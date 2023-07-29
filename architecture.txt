@@ -1,0 +1,43 @@
+Database проекта:
+
+Модель User:
+username - Django AbstractUser
+role - 1 - админ, 2 - первый админ, 3 - второй админ, 4 - главный админ
+
+Модель Job:
+title - названия должности
+description -  описания должности
+
+
+Application:
+user - (ForeignKey к модели User)
+job - должность (ForeignKey к модели Job)
+name - имени
+surname - фамилии
+phone_number - номера телефона
+birth_date - даты рождения
+cv - FileField
+gender - пол
+is_hired - был ли кандидат принят на работу
+
+
+
+
+
+Этапы Проекта :
+
+Настройка Django проекта
+
+Создание моделей
+
+Создание serializers
+
+Создание views для API
+
+Создание views CRUD по кандидатам и должностям
+
+Создание frontend с Vue.js
+
+Создание frontend с Vue.js для работы с API
+
+Настройка Django-Admin для CRUD
