@@ -45,7 +45,9 @@ class Application(models.Model):
     birth_date = models.DateField()
     cv = models.FileField(upload_to='cvs/',blank=True, null=True)
     gender = models.CharField(max_length=1, choices=(('M', 'Мужской'), ('F', 'Женский')))
+    first_validation = models.BooleanField(default=False)
+    second_validation = models.BooleanField(default=False)
     is_hired = models.BooleanField(default=False)
 
     def __str__(self):
-        return f"{self.first_name} {self.last_name} - {self.job.title}"
+        return f"{self.first_name} {self.last_name} : {self.job.title}"
