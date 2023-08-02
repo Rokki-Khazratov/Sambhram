@@ -1,7 +1,37 @@
 from rest_framework import generics
-from .models import Job, Application
-from .serializers import JobSerializer, ApplicationSerializer
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from rest_framework.views import APIView
+from rest_framework import status
+from rest_framework.authtoken.models import Token
 from datetime import datetime
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth import authenticate
+
+
+from .models import Job, Application,User
+from .serializers import JobSerializer, ApplicationSerializer,UserSerializer
+
+class UserLoginAPIView(APIView):
+    def post(self, request):
+        username = request.data.get('username')
+        password = request.data.get('password')
+
+        user = authenticate(username=username, password=password)
+
+        if user:
+            # Authentication successful, generate token and return it
+            token, _ = Token.objects.get_or_create(user=user)
+            return Response({'token': token.key}, status=status.HTTP_200_OK)
+        else:
+            # Invalid credentials, return 401 Unauthorized
+            return Response({'error': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
+
+
+class UserListCreateAPIView(generics.ListCreateAPIView):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
 
 class JobListCreateAPIView(generics.ListCreateAPIView):
     queryset = Job.objects.all()
@@ -76,3 +106,22 @@ class ApplicationRetrieveUpdateAPIView(generics.RetrieveUpdateAPIView):
     queryset = Application.objects.all()
     serializer_class = ApplicationSerializer
     lookup_field = 'id'
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+@login_required
+def application_list(request):
+    user_role = request.user.role
+    if user_role == 2:  # First Admin
+        applications = Application.objects.filter(first_validation=False, second_validation=False)
+    elif user_role == 3:  # Second Admin
+        applications = Application.objects.filter(first_validation=True, second_validation=False) 
+    elif user_role == 4:  # Chief Admin
+        applications = Application.objects.all(first_validation=True, second_validation=True)
+    else:  # Default: Admin (role == 1)
+        applications = Application.objects.all(first_validation=True, second_validation=True)  
+    
+    # Serialize the applications and return the response
+    serializer = ApplicationSerializer(applications, many=True)
+    return Response(serializer.data)
