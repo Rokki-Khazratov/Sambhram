@@ -7,26 +7,47 @@ from rest_framework import status
 from rest_framework.authtoken.models import Token
 from datetime import datetime
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth import authenticate
 
 
 from .models import Job, Application,User
 from .serializers import JobSerializer, ApplicationSerializer,UserSerializer
+from django.contrib.auth import get_user_model
 
-class UserLoginAPIView(APIView):
+import jwt
+from django.conf import settings
+
+class UserLoginAPIView(generics.GenericAPIView):
     def post(self, request):
+        User = get_user_model()
         username = request.data.get('username')
         password = request.data.get('password')
 
-        user = authenticate(username=username, password=password)
+        try:
+            user = User.objects.get(username=username)
+        except User.DoesNotExist:
+            return Response({'error': 'Пользователь не существует'}, status=status.HTTP_401_UNAUTHORIZED)
 
-        if user:
-            # Authentication successful, generate token and return it
-            token, _ = Token.objects.get_or_create(user=user)
-            return Response({'token': token.key}, status=status.HTTP_200_OK)
+        if user.password == password:
+            payload = {
+                'user_id': user.id,
+                'username': user.username,
+            }
+            token = jwt.encode(payload, settings.SECRET_KEY, algorithm='HS256')
+
+            # Установка куки с токеном
+            response = Response({'token': token}, status=status.HTTP_200_OK)
+            response.set_cookie('jwt_token', token, httponly=True, samesite='Lax')
+            return response
         else:
-            # Invalid credentials, return 401 Unauthorized
-            return Response({'error': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
+            return Response({'error': 'Неверный пароль'}, status=status.HTTP_401_UNAUTHORIZED)
+
+
+
+
+
+
+
+
 
 
 class UserListCreateAPIView(generics.ListCreateAPIView):

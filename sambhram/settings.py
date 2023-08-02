@@ -18,6 +18,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
+    'rest_framework_simplejwt',
     'corsheaders',
 ]
 
@@ -82,8 +83,6 @@ USE_I18N = True
 
 USE_TZ = True
 
-AUTH_USER_MODEL = 'api.User'  # 'api.models.User' -> 'api.User'
-
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:8080",
 ]
@@ -100,3 +99,16 @@ CORS_ALLOW_METHODS = [
 STATIC_URL = '/static/'  # Added leading slash /
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+AUTH_USER_MODEL = 'api.User'
+
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ),
+}
+
+AUTHENTICATION_BACKENDS = [
+    'rest_framework.authentication.TokenAuthentication',
+]
