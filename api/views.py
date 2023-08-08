@@ -146,3 +146,29 @@ def application_list(request):
     # Serialize the applications and return the response
     serializer = ApplicationSerializer(applications, many=True)
     return Response(serializer.data)
+
+
+@api_view(['PUT', 'PATCH'])
+@permission_classes([IsAuthenticated])
+def apply_to_next_manager(request, application_id):
+    try:
+        application = Application.objects.get(pk=application_id)
+        user_role = request.user.role
+
+        if user_role == 2:
+            application.first_validation = True
+            application.second_validation = False
+            application.is_hired = False
+        elif user_role == 3:
+            application.second_validation = True
+            application.is_hired = False
+        elif user_role == 4:
+            application.is_hired = True
+        else:
+            return Response({"error": "You are not authorized to approve this application."}, status=403)
+
+        application.save()
+        return Response({"message": "Application approved successfully."})
+
+    except Application.DoesNotExist:
+        return Response({"error": "Application not found."}, status=404)
