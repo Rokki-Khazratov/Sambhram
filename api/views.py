@@ -58,7 +58,7 @@ class JobListCreateAPIView(generics.ListCreateAPIView):
     queryset = Job.objects.all()
     serializer_class = JobSerializer
 
-class JobRetrieveUpdateAPIView(generics.RetrieveUpdateAPIView):
+class JobRetrieveUpdateDestroyAPIView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Job.objects.all()
     serializer_class = JobSerializer
     lookup_field = 'id'
@@ -123,7 +123,7 @@ class ApplicationListCreateAPIView(generics.ListCreateAPIView):
 
         return queryset
 
-class ApplicationRetrieveUpdateAPIView(generics.RetrieveUpdateAPIView):
+class ApplicationRetrieveUpdateDestroyAPIView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Application.objects.all()
     serializer_class = ApplicationSerializer
     lookup_field = 'id'
