@@ -102,6 +102,8 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+# AUTH_USER_MODEL = api.models.User
+
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
@@ -110,7 +112,7 @@ REST_FRAMEWORK = {
 }
 
 AUTHENTICATION_BACKENDS = [
-    'rest_framework.authentication.TokenAuthentication',
-    ('django.contrib.auth.backends.ModelBackend'),
-
+    'api.backends.CustomModelBackend',
+    # 'rest_framework.authentication.TokenAuthentication',
+    'django.contrib.auth.backends.ModelBackend',
 ]

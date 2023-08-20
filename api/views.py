@@ -11,41 +11,41 @@ from django.contrib.auth.decorators import login_required
 
 from .models import Job, Application,User
 from .serializers import JobSerializer, ApplicationSerializer,UserSerializer
-from django.contrib.auth import get_user_model
 
 import jwt
 from django.conf import settings
 
+from django.contrib.auth import get_user_model, authenticate
+
 class UserLoginAPIView(generics.GenericAPIView):
     def post(self, request):
-        User = get_user_model()
-        username = request.data.get('username')
+
         password = request.data.get('password')
+        username = request.data.get('username')
+
+        user = get_user_model()
 
         try:
             user = User.objects.get(username=username)
+            print("User exists:", user)
         except User.DoesNotExist:
             return Response({'error': 'Пользователь не существует'}, status=status.HTTP_401_UNAUTHORIZED)
+            
 
-        if user.password == password:
-            payload = {
-                'user_id': user.id,
-                'username': user.username,
-            }
-            token = jwt.encode(payload, settings.SECRET_KEY, algorithm='HS256')
-
-            # Установка куки с токеном
-            response = Response({'token': token}, status=status.HTTP_200_OK)
-            response.set_cookie('jwt_token', token, httponly=True, samesite='Lax')
-            return response
-        else:
+        if user.password != password:
             return Response({'error': 'Неверный пароль'}, status=status.HTTP_401_UNAUTHORIZED)
 
+        payload = {
+            'user_id': user.id,
+            'username': user.username,
+        }
+        token = jwt.encode(payload, settings.SECRET_KEY, algorithm='HS256')
+
+        response = Response({'token': token}, status=status.HTTP_200_OK)
+        response.set_cookie('jwt_token', token, httponly=True, samesite='Lax')
 
 
-
-
-
+        return response
 
 
 
@@ -127,6 +127,10 @@ class ApplicationRetrieveUpdateDestroyAPIView(generics.RetrieveUpdateDestroyAPIV
     queryset = Application.objects.all()
     serializer_class = ApplicationSerializer
     lookup_field = 'id'
+
+
+
+
 
 
 @api_view(['GET'])
